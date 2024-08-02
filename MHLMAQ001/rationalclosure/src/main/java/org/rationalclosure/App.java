@@ -54,9 +54,10 @@ public class App {
             reader.close();
 
             // BaseRankThreaded object instantiated to allow the base ranking algorithm to run.
-            BaseRankThreaded baseRank = new BaseRankThreaded(beliefSet, classicalSet);
+            //BaseRankThreaded baseRank = new BaseRankThreaded(beliefSet, classicalSet);
+            BaseRankThreaded.setCkb(classicalSet);
             // Ranked knowledge base returned.
-            ArrayList<PlBeliefSet> rankedKB = baseRank.getRankedKB();
+            ArrayList<PlBeliefSet> rankedKB = BaseRankThreaded.rank(beliefSet, new PlBeliefSet());
 
             // RationalReasoner object instantiated.
             RationalReasoner reasoner = new RationalReasoner(rankedKB);

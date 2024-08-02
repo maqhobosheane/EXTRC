@@ -19,8 +19,9 @@ public class TimedReasonerComparison {
         classicalSet.add(new Implication(new Proposition("B"), new Proposition("C")));
 
         // Create ranked knowledge base
-        BaseRankThreaded baseRank = new BaseRankThreaded(beliefSet, classicalSet);
-        ArrayList<PlBeliefSet> rankedKB = baseRank.getRankedKB();
+        BaseRankThreaded.setCkb(classicalSet);
+            
+        ArrayList<PlBeliefSet> rankedKB = BaseRankThreaded.rank(beliefSet, new PlBeliefSet());
 
         // Create reasoners
         RationalReasoner reasoner = new RationalReasoner(rankedKB);
