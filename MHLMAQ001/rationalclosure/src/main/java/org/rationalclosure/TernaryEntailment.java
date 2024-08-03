@@ -32,11 +32,19 @@ public class TernaryEntailment {
             System.out.println("Result for mid1: " + resultMid1 + ", Result for mid2: " + resultMid2);
 
             // Adjust the search range based on the results
-            if (resultMid1) {
-                max = mid1 - 1;
+            if (resultMid1 && !resultMid2) {
+                // Verify if consistency holds when all ranks up to max are considered
+                boolean finalCheck = checkEntailmentForRange(rankedKB, formula, min, max);
+                if (finalCheck) {
+                    return true;  // Since the highest relevant rank is consistent, return true
+                } else {
+                    return false; // Inconsistency found when all ranks are considered
+                }
             } else if (resultMid2) {
-                min = mid2 + 1;
+                // If the query is consistent with [mid2, max], move to lower range
+                max = mid2 - 1;
             } else {
+                // If neither are consistent, narrow the search in between
                 min = mid1 + 1;
                 max = mid2 - 1;
             }

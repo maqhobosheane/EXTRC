@@ -1,0 +1,14 @@
+A -> B
+C -> D
+E -> !F
+G -> H
+A ~> C
+B ~> E
+C ~> D
+D ~> G
+E ~> I
+F ~> J
+G ~> K
+H ~> L
+I ~> M
+J ~> N
