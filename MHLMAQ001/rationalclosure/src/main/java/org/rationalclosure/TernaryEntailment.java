@@ -2,70 +2,61 @@
 
 package org.rationalclosure;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 import org.tweetyproject.logics.pl.syntax.PlBeliefSet;
 import org.tweetyproject.logics.pl.syntax.PlFormula;
+import org.tweetyproject.logics.pl.syntax.Negation;
 import org.tweetyproject.logics.pl.reasoner.SatReasoner;
 
 public class TernaryEntailment {
-    // Cache to store results of previously computed entailment checks
-    private Map<String, Boolean> memoizationCache = new HashMap<>();
-
     // Main method to check entailment using ternary search
     public boolean checkEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
         System.out.println("Starting ternary entailment check for: " + formula.toString());
-        int min = 0;
-        int max = rankedKB.length - 1;
 
-        // Ternary search loop
-        while (min <= max) {
-            int mid1 = min + (max - min) / 3;
-            int mid2 = max - (max - min) / 3;
+        // Remove contradictory ranks
+        ArrayList<PlBeliefSet> filteredKB = removeContradictions(rankedKB, formula);
 
-            System.out.println("Checking range: " + min + " to " + mid1 + " and " + mid2 + " to " + max);
-
-            // Check entailment in the ranges defined by mid1 and mid2
-            boolean resultMid1 = checkEntailmentForRange(rankedKB, formula, min, mid1);
-            boolean resultMid2 = checkEntailmentForRange(rankedKB, formula, mid2, max);
-
-            System.out.println("Result for mid1: " + resultMid1 + ", Result for mid2: " + resultMid2);
-
-            // Adjust the search range based on the results
-            if (resultMid1 && !resultMid2) {
-                // Verify if consistency holds when all ranks up to max are considered
-                boolean finalCheck = checkEntailmentForRange(rankedKB, formula, min, max);
-                if (finalCheck) {
-                    return true;  // Since the highest relevant rank is consistent, return true
-                } else {
-                    return false; // Inconsistency found when all ranks are considered
-                }
-            } else if (resultMid2) {
-                // If the query is consistent with [mid2, max], move to lower range
-                max = mid2 - 1;
-            } else {
-                // If neither are consistent, narrow the search in between
-                min = mid1 + 1;
-                max = mid2 - 1;
-            }
+        if (filteredKB.isEmpty()) {
+            return false;
         }
 
-        // Final check for the narrowed-down range
-        boolean finalResult = checkEntailmentForRange(rankedKB, formula, min, max);
+        // Final entailment check on the contradiction-free knowledge base
+        PlBeliefSet[] filteredKBArray = new PlBeliefSet[filteredKB.size()];
+        filteredKBArray = filteredKB.toArray(filteredKBArray);
+        boolean finalResult = checkEntailmentForRange(filteredKBArray, formula, 0, filteredKBArray.length - 1);
         System.out.println("Final entailment result: " + finalResult);
         return finalResult;
     }
 
-    // Helper method to check entailment within a specific range of ranks
-    private boolean checkEntailmentForRange(PlBeliefSet[] rankedKB, PlFormula formula, int min, int max) {
-        String cacheKey = formula.toString() + "_" + min + "_" + max;
+    // Remove ranks that cause contradictions and return the filtered knowledge base
+    private ArrayList<PlBeliefSet> removeContradictions(PlBeliefSet[] rankedKB, PlFormula formula) {
+        ArrayList<PlBeliefSet> filteredKB = new ArrayList<>();
+        SatReasoner reasoner = new SatReasoner();
 
-        // Return cached result if available
-        if (memoizationCache.containsKey(cacheKey)) {
-            System.out.println("Cache hit for key: " + cacheKey);
-            return memoizationCache.get(cacheKey);
+        for (int i = 0; i < rankedKB.length; i++) {
+            // Create a combined belief set from rank i to the end
+            PlBeliefSet combinedBeliefSet = new PlBeliefSet();
+            for (int j = i; j < rankedKB.length; j++) {
+                combinedBeliefSet.addAll(rankedKB[j]);
+            }
+
+            // Negate the antecedent of the formula
+            PlFormula negatedAntecedent = App.negateAntecedent(formula);
+
+            // Check if the combined belief set entails the negation of the antecedent
+            if (!reasoner.query(combinedBeliefSet, negatedAntecedent)) {
+                // If it does not entail the negation, include this rank
+                filteredKB.add(rankedKB[i]);
+            } else {
+                System.out.println("Removing contradictory rank: " + i);
+            }
         }
 
+        return filteredKB;
+    }
+
+    // Helper method to check entailment within a specific range of ranks
+    private boolean checkEntailmentForRange(PlBeliefSet[] rankedKB, PlFormula formula, int min, int max) {
         // Combine the ranks within the specified range
         PlBeliefSet combinedBeliefSet = new PlBeliefSet();
         for (int i = min; i <= max; i++) {
@@ -76,10 +67,7 @@ public class TernaryEntailment {
 
         // Check entailment using the SAT reasoner from the TweetyProject
         SatReasoner reasoner = new SatReasoner();
-        boolean result = reasoner.query(combinedBeliefSet, formula);
-
-        // Cache the result
-        memoizationCache.put(cacheKey, result);
-        return result;
+        return reasoner.query(combinedBeliefSet, formula);
     }
 }
+

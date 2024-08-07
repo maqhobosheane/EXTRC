@@ -36,7 +36,8 @@ public class App {
                 if (stringFormula.contains("~>")) {
                     // Reformatting of the defeasible implications of the kb if necessary, as well as 
                     // the reformatting of the defeasible queries from ~> to =>.
-                    stringFormula = reformatConnectives(reformatDefeasible(stringFormula));
+                    stringFormula = reformatDefeasible(stringFormula);
+                    stringFormula = reformatConnectives(stringFormula);
                     System.out.println("Reformatted defeasible: " + stringFormula); // Debugging output
                     // All defeasible implications are added to the defeasible beliefset.
                     // Parse formula from string.
@@ -54,7 +55,6 @@ public class App {
             reader.close();
 
             // BaseRankThreaded object instantiated to allow the base ranking algorithm to run.
-            //BaseRankThreaded baseRank = new BaseRankThreaded(beliefSet, classicalSet);
             BaseRankThreaded.setCkb(classicalSet);
             // Ranked knowledge base returned.
             ArrayList<PlBeliefSet> rankedKB = BaseRankThreaded.rank(beliefSet, new PlBeliefSet());
@@ -76,7 +76,8 @@ public class App {
                     continue;
                 }
 
-                queryFormula = reformatConnectives(reformatDefeasible(queryFormula));
+                queryFormula = reformatDefeasible(queryFormula);
+                queryFormula = reformatConnectives(queryFormula);
                 System.out.println("Reformatted query: " + queryFormula); // Debugging output
                 PlFormula query = (PlFormula) parser.parseFormula(queryFormula);
 
@@ -92,10 +93,21 @@ public class App {
         }
     }
 
+    // Method to negate the antecedent of an implication
+    public static PlFormula negateAntecedent(PlFormula formula) {
+        if (formula instanceof Implication) {
+            Implication implication = (Implication) formula;
+            PlFormula antecedent = (PlFormula) implication.getFirstFormula();
+            return new Negation(antecedent);
+        }
+        throw new IllegalArgumentException("Provided formula is not an implication.");
+    }
+
     // The methods below allow the application to make any reformatting necessary possible,
     // and takes into consideration the logic that may be used by the end user, however this 
     // may not account for all possibilities. In that case, the user will be asked to 
     // reformat their defeasible implications.
+
     public static String reformatDefeasible(String formula) {
         int index = formula.indexOf("~>");
         formula = "(" + formula.substring(0, index).trim() + ") => (" + formula.substring(index + 2).trim() + ")";
@@ -111,3 +123,4 @@ public class App {
         return formula;
     }
 }
+
