@@ -1,42 +1,35 @@
-/* Originally written by Evashna Pillay, optimized by Maqhobosheane Mohlerepe */
-
 package org.rationalclosure;
 
-import java.util.ArrayList;
 import org.tweetyproject.logics.pl.syntax.PlBeliefSet;
 import org.tweetyproject.logics.pl.syntax.PlFormula;
-import org.tweetyproject.logics.pl.syntax.Negation;
 import org.tweetyproject.logics.pl.reasoner.SatReasoner;
 
-public class TernaryEntailment {
-    // Main method to check entailment using ternary search
+public class TernaryEntailment implements EntailmentInterface {
+    @Override
     public boolean checkEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
         System.out.println("Starting ternary entailment check for: " + formula.toString());
 
         // Remove contradictory ranks
-        ArrayList<PlBeliefSet> filteredKB = removeContradictions(rankedKB, formula);
+        int max = removeContradictions(rankedKB, formula);
 
-        if (filteredKB.isEmpty()) {
+        if (max == -1) {
             return false;
         }
 
         // Final entailment check on the contradiction-free knowledge base
-        PlBeliefSet[] filteredKBArray = new PlBeliefSet[filteredKB.size()];
-        filteredKBArray = filteredKB.toArray(filteredKBArray);
-        boolean finalResult = checkEntailmentForRange(filteredKBArray, formula, 0, filteredKBArray.length - 1);
+        boolean finalResult = checkEntailmentForRange(rankedKB, formula, 0, max);
         System.out.println("Final entailment result: " + finalResult);
         return finalResult;
     }
 
-    // Remove ranks that cause contradictions and return the filtered knowledge base
-    private ArrayList<PlBeliefSet> removeContradictions(PlBeliefSet[] rankedKB, PlFormula formula) {
-        ArrayList<PlBeliefSet> filteredKB = new ArrayList<>();
-        SatReasoner reasoner = new SatReasoner();
+    // Remove ranks that cause contradictions and return the index of the last valid rank
+    private int removeContradictions(PlBeliefSet[] rankedKB, PlFormula formula) {
+        int max = rankedKB.length - 1;
 
-        for (int i = 0; i < rankedKB.length; i++) {
-            // Create a combined belief set from rank i to the end
+        for (int i = 0; i <= max; i++) {
+            // Create a combined belief set from rank i to max
             PlBeliefSet combinedBeliefSet = new PlBeliefSet();
-            for (int j = i; j < rankedKB.length; j++) {
+            for (int j = i; j <= max; j++) {
                 combinedBeliefSet.addAll(rankedKB[j]);
             }
 
@@ -44,15 +37,16 @@ public class TernaryEntailment {
             PlFormula negatedAntecedent = App.negateAntecedent(formula);
 
             // Check if the combined belief set entails the negation of the antecedent
-            if (!reasoner.query(combinedBeliefSet, negatedAntecedent)) {
-                // If it does not entail the negation, include this rank
-                filteredKB.add(rankedKB[i]);
-            } else {
+            SatReasoner reasoner = new SatReasoner();
+            if (reasoner.query(combinedBeliefSet, negatedAntecedent)) {
+                // If it entails the negation, remove the most typical rank (i)
                 System.out.println("Removing contradictory rank: " + i);
+                max--;
+                i = -1; // Restart checking from the beginning
             }
         }
 
-        return filteredKB;
+        return max;
     }
 
     // Helper method to check entailment within a specific range of ranks
@@ -67,7 +61,8 @@ public class TernaryEntailment {
 
         // Check entailment using the SAT reasoner from the TweetyProject
         SatReasoner reasoner = new SatReasoner();
-        return reasoner.query(combinedBeliefSet, formula);
+        boolean result = reasoner.query(combinedBeliefSet, formula);
+
+        return result;
     }
 }
-

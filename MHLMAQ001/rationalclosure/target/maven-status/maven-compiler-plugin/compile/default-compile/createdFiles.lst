@@ -1,6 +1,9 @@
-org\rationalclosure\BaseRankThreaded.class
 org\rationalclosure\IndexingEntailment.class
-org\rationalclosure\RationalReasoner.class
+org\rationalclosure\BinaryEntailment.class
 org\rationalclosure\TernaryEntailment.class
 org\rationalclosure\TimedReasonerComparison.class
 org\rationalclosure\App.class
+org\rationalclosure\BaseRankThreaded.class
+org\rationalclosure\RationalReasoner.class
+org\rationalclosure\NaiveEntailment.class
+org\rationalclosure\EntailmentInterface.class

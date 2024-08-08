@@ -36,8 +36,7 @@ public class App {
                 if (stringFormula.contains("~>")) {
                     // Reformatting of the defeasible implications of the kb if necessary, as well as 
                     // the reformatting of the defeasible queries from ~> to =>.
-                    stringFormula = reformatDefeasible(stringFormula);
-                    stringFormula = reformatConnectives(stringFormula);
+                    stringFormula = reformatConnectives(reformatDefeasible(stringFormula));
                     System.out.println("Reformatted defeasible: " + stringFormula); // Debugging output
                     // All defeasible implications are added to the defeasible beliefset.
                     // Parse formula from string.
@@ -55,12 +54,35 @@ public class App {
             reader.close();
 
             // BaseRankThreaded object instantiated to allow the base ranking algorithm to run.
+            //BaseRankThreaded baseRank = new BaseRankThreaded(beliefSet, classicalSet);
             BaseRankThreaded.setCkb(classicalSet);
             // Ranked knowledge base returned.
             ArrayList<PlBeliefSet> rankedKB = BaseRankThreaded.rank(beliefSet, new PlBeliefSet());
 
-            // RationalReasoner object instantiated.
-            RationalReasoner reasoner = new RationalReasoner(rankedKB);
+            // Prompt user to choose entailment method
+            System.out.println("Choose entailment method:");
+            System.out.println("1. Naive Entailment");
+            System.out.println("2. Binary Entailment");
+            System.out.println("3. Ternary Entailment");
+            Scanner scanner = new Scanner(System.in);
+            int choice = scanner.nextInt();
+            EntailmentInterface entailment;
+
+            switch (choice) {
+                case 1:
+                    entailment = new NaiveEntailment();
+                    break;
+                case 2:
+                    entailment = new BinaryEntailment();
+                    break;
+                case 3:
+                    entailment = new TernaryEntailment();
+                    break;
+                default:
+                    System.out.println("Invalid choice. Defaulting to Naive Entailment.");
+                    entailment = new NaiveEntailment();
+                    break;
+            }
 
             // Query file assigned to the string variable queryFile.
             String queryFile = args[1];
@@ -76,13 +98,12 @@ public class App {
                     continue;
                 }
 
-                queryFormula = reformatDefeasible(queryFormula);
-                queryFormula = reformatConnectives(queryFormula);
+                queryFormula = reformatConnectives(reformatDefeasible(queryFormula));
                 System.out.println("Reformatted query: " + queryFormula); // Debugging output
                 PlFormula query = (PlFormula) parser.parseFormula(queryFormula);
 
                 // Query the reasoner and print result.
-                boolean result = reasoner.query(query);
+                boolean result = entailment.checkEntailment(rankedKB.toArray(new PlBeliefSet[0]), query);
                 System.out.println("Query: " + queryFormula + " Result: " + result);
             }
             qreader.close();
@@ -97,7 +118,7 @@ public class App {
     public static PlFormula negateAntecedent(PlFormula formula) {
         if (formula instanceof Implication) {
             Implication implication = (Implication) formula;
-            PlFormula antecedent = (PlFormula) implication.getFirstFormula();
+            PlFormula antecedent = (PlFormula) implication.getFormulas().getFirst();
             return new Negation(antecedent);
         }
         throw new IllegalArgumentException("Provided formula is not an implication.");
@@ -107,7 +128,6 @@ public class App {
     // and takes into consideration the logic that may be used by the end user, however this 
     // may not account for all possibilities. In that case, the user will be asked to 
     // reformat their defeasible implications.
-
     public static String reformatDefeasible(String formula) {
         int index = formula.indexOf("~>");
         formula = "(" + formula.substring(0, index).trim() + ") => (" + formula.substring(index + 2).trim() + ")";
@@ -123,4 +143,5 @@ public class App {
         return formula;
     }
 }
+
 
