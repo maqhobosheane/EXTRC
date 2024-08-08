@@ -1,5 +1,8 @@
+/* Author: Maqhobosheane Mohlerepe, algorithm adopted from Evashna Pillay */
+
 package org.rationalclosure;
 
+import java.util.ArrayList;
 import org.tweetyproject.logics.pl.syntax.PlBeliefSet;
 import org.tweetyproject.logics.pl.syntax.PlFormula;
 import org.tweetyproject.logics.pl.reasoner.SatReasoner;
@@ -9,60 +12,76 @@ public class TernaryEntailment implements EntailmentInterface {
     public boolean checkEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
         System.out.println("Starting ternary entailment check for: " + formula.toString());
 
-        // Remove contradictory ranks
-        int max = removeContradictions(rankedKB, formula);
+        // Initialize min and max to cover the entire range of ranks
+        int min = 0;
+        int max = rankedKB.length - 1;
+        
+        // Continue the search until min and max converge
+        while (max > min) {
+            // Calculate the first and second midpoints
+            int mid1 = min + (max - min) / 3;
+            int mid2 = max - (max - min) / 3;
 
-        if (max == -1) {
-            return false;
+            // Check if removing ranks from mid1+1 to max results in consistency with the negated antecedent
+            PlBeliefSet combinedBeliefSetMid1 = combineRanks(rankedKB, mid1 + 1, max);
+            PlFormula negatedAntecedent = App.negateAntecedent(formula);
+            
+            SatReasoner reasoner = new SatReasoner();
+            if (reasoner.query(combinedBeliefSetMid1, negatedAntecedent)) {
+                // If consistent, update min to search the upper half
+                min = mid1 + 1;
+            } else {
+                // Otherwise, check if adding rank mid1 results in consistency with the negated antecedent
+                PlBeliefSet combinedBeliefSetMid1AndBelow = combineRanks(rankedKB, min, mid1);
+                if (reasoner.query(combinedBeliefSetMid1AndBelow, negatedAntecedent)) {
+                    // If consistent, update max to search the lower half
+                    max = mid1;
+                } else {
+                    // If not, check the final entailment result with the combined belief set
+                    return reasoner.query(combinedBeliefSetMid1AndBelow, formula);
+                }
+            }
+
+            // Check if mid2 is within the valid range
+            if (mid2 < rankedKB.length) {
+                // Check if removing ranks from mid2+1 to max results in consistency with the negated antecedent
+                PlBeliefSet combinedBeliefSetMid2 = combineRanks(rankedKB, mid2 + 1, max);
+                if (reasoner.query(combinedBeliefSetMid2, negatedAntecedent)) {
+                    // If consistent, update min to search the upper half
+                    min = mid2 + 1;
+                } else {
+                    // Otherwise, check if adding rank mid2 results in consistency with the negated antecedent
+                    PlBeliefSet combinedBeliefSetMid2AndBelow = combineRanks(rankedKB, min, mid2);
+                    if (reasoner.query(combinedBeliefSetMid2AndBelow, negatedAntecedent)) {
+                        // If consistent, update max to search the lower half
+                        max = mid2;
+                    } else {
+                        // If not, check the final entailment result with the combined belief set
+                        return reasoner.query(combinedBeliefSetMid2AndBelow, formula);
+                    }
+                }
+            } else if (mid2 == rankedKB.length) {
+                // If mid2 is out of range, adjust min and max accordingly
+                max = mid1;
+                min = mid1 + 1;
+            }
         }
 
-        // Final entailment check on the contradiction-free knowledge base
-        boolean finalResult = checkEntailmentForRange(rankedKB, formula, 0, max);
+        // Final entailment check with the combined belief set from 0 to max
+        PlBeliefSet finalCombinedBeliefSet = combineRanks(rankedKB, 0, max);
+        boolean finalResult = new SatReasoner().query(finalCombinedBeliefSet, formula);
         System.out.println("Final entailment result: " + finalResult);
         return finalResult;
     }
 
-    // Remove ranks that cause contradictions and return the index of the last valid rank
-    private int removeContradictions(PlBeliefSet[] rankedKB, PlFormula formula) {
-        int max = rankedKB.length - 1;
-
-        for (int i = 0; i <= max; i++) {
-            // Create a combined belief set from rank i to max
-            PlBeliefSet combinedBeliefSet = new PlBeliefSet();
-            for (int j = i; j <= max; j++) {
-                combinedBeliefSet.addAll(rankedKB[j]);
-            }
-
-            // Negate the antecedent of the formula
-            PlFormula negatedAntecedent = App.negateAntecedent(formula);
-
-            // Check if the combined belief set entails the negation of the antecedent
-            SatReasoner reasoner = new SatReasoner();
-            if (reasoner.query(combinedBeliefSet, negatedAntecedent)) {
-                // If it entails the negation, remove the most typical rank (i)
-                System.out.println("Removing contradictory rank: " + i);
-                max--;
-                i = -1; // Restart checking from the beginning
-            }
-        }
-
-        return max;
-    }
-
-    // Helper method to check entailment within a specific range of ranks
-    private boolean checkEntailmentForRange(PlBeliefSet[] rankedKB, PlFormula formula, int min, int max) {
-        // Combine the ranks within the specified range
+    // Combine the belief sets from the specified range (start to end)
+    private PlBeliefSet combineRanks(PlBeliefSet[] rankedKB, int start, int end) {
         PlBeliefSet combinedBeliefSet = new PlBeliefSet();
-        for (int i = min; i <= max; i++) {
+        for (int i = start; i <= end; i++) {
             combinedBeliefSet.addAll(rankedKB[i]);
         }
-
-        System.out.println("Combined belief set for range " + min + " to " + max + ": " + combinedBeliefSet.toString());
-
-        // Check entailment using the SAT reasoner from the TweetyProject
-        SatReasoner reasoner = new SatReasoner();
-        boolean result = reasoner.query(combinedBeliefSet, formula);
-
-        return result;
+        System.out.println("Combined belief set for range " + start + " to " + end + ": " + combinedBeliefSet.toString());
+        return combinedBeliefSet;
     }
 }
+
