@@ -8,6 +8,20 @@ import org.tweetyproject.logics.pl.syntax.PlFormula;
 import org.tweetyproject.logics.pl.reasoner.SatReasoner;
 
 public class BinaryEntailment implements EntailmentInterface {
+  
+    private PlBeliefSet[] rankedKB;
+    private PlFormula formula;
+
+    // Constructor that accepts rankedKB and formula
+    public BinaryEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
+        this.rankedKB = rankedKB;
+        this.formula = formula;
+    }
+
+    // Default constructor
+    public BinaryEntailment() {
+    }
+
     // Main method to check entailment using binary rational closure
     @Override
     public boolean checkEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {

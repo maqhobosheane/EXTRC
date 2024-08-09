@@ -3,8 +3,9 @@
 package org.rationalclosure;
 
 import java.io.*;
-import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 import org.tweetyproject.logics.pl.syntax.*;
 import org.tweetyproject.logics.pl.parser.PlParser;
 import org.tweetyproject.commons.ParserException;
@@ -12,14 +13,17 @@ import org.tweetyproject.commons.ParserException;
 public class App {
 
     public static void main(String[] args) throws IOException, ParserException {
-        
+        if (args.length < 2) {
+            System.out.println("Please provide the knowledge base file and query file as arguments.");
+            return;
+        }
+
         PlBeliefSet beliefSet = new PlBeliefSet();
         PlBeliefSet classicalSet = new PlBeliefSet();
         PlParser parser = new PlParser();
-        
+
         // The kb file is assigned to the string variable fileName.
         String fileName = args[0];
-
         try {
             File file = new File(fileName);
             Scanner reader = new Scanner(file);
@@ -54,64 +58,86 @@ public class App {
             reader.close();
 
             // BaseRankThreaded object instantiated to allow the base ranking algorithm to run.
-            //BaseRankThreaded baseRank = new BaseRankThreaded(beliefSet, classicalSet);
             BaseRankThreaded.setCkb(classicalSet);
             // Ranked knowledge base returned.
             ArrayList<PlBeliefSet> rankedKB = BaseRankThreaded.rank(beliefSet, new PlBeliefSet());
 
-            // Prompt user to choose entailment method
-            System.out.println("Choose entailment method:");
-            System.out.println("1. Naive Entailment");
-            System.out.println("2. Binary Entailment");
-            System.out.println("3. Ternary Entailment");
+            // Prompt user to choose running mode
+            System.out.println("Choose running mode:");
+            System.out.println("1. Run timed reasoner comparison");
+            System.out.println("2. Run reasoners independently");
             Scanner scanner = new Scanner(System.in);
-            int choice = scanner.nextInt();
-            EntailmentInterface entailment;
+            int modeChoice = scanner.nextInt();
 
-            switch (choice) {
-                case 1:
-                    entailment = new NaiveEntailment();
-                    break;
-                case 2:
-                    entailment = new BinaryEntailment();
-                    break;
-                case 3:
-                    entailment = new TernaryEntailment();
-                    break;
-                default:
-                    System.out.println("Invalid choice. Defaulting to Naive Entailment.");
-                    entailment = new NaiveEntailment();
-                    break;
+            if (modeChoice == 1) {
+                // Run timed reasoner comparison
+                runTimedReasonerComparison(rankedKB, parser, args[1]);
+            } else if (modeChoice == 2) {
+                // Run reasoners independently
+                runReasonersIndependently(rankedKB, parser, args[1]);
+            } else {
+                System.out.println("Invalid choice. Exiting.");
             }
-
-            // Query file assigned to the string variable queryFile.
-            String queryFile = args[1];
-            File qfile = new File(queryFile);
-            Scanner qreader = new Scanner(qfile);
-
-            // Query file read until end of file.
-            while (qreader.hasNextLine()) {
-                String queryFormula = qreader.nextLine().trim();
-                System.out.println("Read query: " + queryFormula); // Debugging output
-
-                if (queryFormula.isEmpty()) {
-                    continue;
-                }
-
-                queryFormula = reformatConnectives(reformatDefeasible(queryFormula));
-                System.out.println("Reformatted query: " + queryFormula); // Debugging output
-                PlFormula query = (PlFormula) parser.parseFormula(queryFormula);
-
-                // Query the reasoner and print result.
-                boolean result = entailment.checkEntailment(rankedKB.toArray(new PlBeliefSet[0]), query);
-                System.out.println("Query: " + queryFormula + " Result: " + result);
-            }
-            qreader.close();
 
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
+    }
+
+    private static void runReasonersIndependently(ArrayList<PlBeliefSet> rankedKB, PlParser parser, String queryFile) throws IOException, ParserException {
+        // Prompt user to choose entailment method
+        System.out.println("Choose entailment method:");
+        System.out.println("1. Naive Entailment");
+        System.out.println("2. Binary Entailment");
+        System.out.println("3. Ternary Entailment");
+        Scanner scanner = new Scanner(System.in);
+        int choice = scanner.nextInt();
+        EntailmentInterface entailment;
+
+        switch (choice) {
+            case 1:
+                entailment = new NaiveEntailment();
+                break;
+            case 2:
+                entailment = new BinaryEntailment();
+                break;
+            case 3:
+                entailment = new TernaryEntailment();
+                break;
+            default:
+                System.out.println("Invalid choice. Defaulting to Naive Entailment.");
+                entailment = new NaiveEntailment();
+                break;
+        }
+
+        // Query file assigned to the string variable queryFile.
+        File qfile = new File(queryFile);
+        Scanner qreader = new Scanner(qfile);
+
+        // Query file read until end of file.
+        while (qreader.hasNextLine()) {
+            String queryFormula = qreader.nextLine().trim();
+            System.out.println("Read query: " + queryFormula); // Debugging output
+
+            if (queryFormula.isEmpty()) {
+                continue;
+            }
+
+            queryFormula = reformatConnectives(reformatDefeasible(queryFormula));
+            System.out.println("Reformatted query: " + queryFormula); // Debugging output
+            PlFormula query = (PlFormula) parser.parseFormula(queryFormula);
+
+            // Query the reasoner and print result.
+            boolean result = entailment.checkEntailment(rankedKB.toArray(new PlBeliefSet[0]), query);
+            System.out.println("Query: " + queryFormula + " Result: " + result);
+        }
+        qreader.close();
+    }
+
+    private static void runTimedReasonerComparison(ArrayList<PlBeliefSet> rankedKB, PlParser parser, String queryFile) throws IOException, ParserException {
+        // Pass the ranked knowledge base and query file to the timed reasoner
+        TimedReasonerComparison.runTimedComparison(rankedKB, parser, queryFile);
     }
 
     // Method to negate the antecedent of an implication
@@ -143,5 +169,3 @@ public class App {
         return formula;
     }
 }
-
-

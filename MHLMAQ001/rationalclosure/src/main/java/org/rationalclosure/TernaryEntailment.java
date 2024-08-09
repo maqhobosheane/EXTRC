@@ -8,6 +8,20 @@ import org.tweetyproject.logics.pl.syntax.PlFormula;
 import org.tweetyproject.logics.pl.reasoner.SatReasoner;
 
 public class TernaryEntailment implements EntailmentInterface {
+
+    private PlBeliefSet[] rankedKB;
+    private PlFormula formula;
+
+    // Constructor that accepts rankedKB and formula
+    public TernaryEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
+        this.rankedKB = rankedKB;
+        this.formula = formula;
+    }
+
+    // Default constructor
+    public TernaryEntailment() {
+    }
+
     @Override
     public boolean checkEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
         System.out.println("Starting ternary entailment check for: " + formula.toString());

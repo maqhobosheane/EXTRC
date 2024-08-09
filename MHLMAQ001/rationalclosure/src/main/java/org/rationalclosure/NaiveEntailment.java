@@ -9,6 +9,20 @@ import org.tweetyproject.logics.pl.syntax.Negation;
 import org.tweetyproject.logics.pl.reasoner.SatReasoner;
 
 public class NaiveEntailment implements EntailmentInterface {
+
+    private PlBeliefSet[] rankedKB;
+    private PlFormula formula;
+
+    // Constructor that accepts rankedKB and formula
+    public NaiveEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
+        this.rankedKB = rankedKB;
+        this.formula = formula;
+    }
+
+    // Default constructor
+    public NaiveEntailment() {
+    }
+
     // Main method to check entailment using naive rational closure
     @Override
     public boolean checkEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
@@ -71,3 +85,4 @@ public class NaiveEntailment implements EntailmentInterface {
         return reasoner.query(combinedBeliefSet, formula);
     }
 }
+
