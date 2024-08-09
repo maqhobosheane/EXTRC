@@ -29,9 +29,12 @@ public class TimedReasonerComparison {
 
         // List of reasoners to compare
         List<EntailmentInterface> reasoners = new ArrayList<>();
-        reasoners.add(new NaiveEntailment(rankedKB.toArray(new PlBeliefSet[0]), null));
-        reasoners.add(new BinaryEntailment(rankedKB.toArray(new PlBeliefSet[0]), null));
-        reasoners.add(new TernaryEntailment(rankedKB.toArray(new PlBeliefSet[0]), null));
+        reasoners.add(new NaiveEntailment());
+        reasoners.add(new BinaryEntailment());
+        reasoners.add(new TernaryEntailment());
+        reasoners.add(new NCachedEntailment()); // Cached Naive Entailment
+        reasoners.add(new BCachedEntailment()); // Cached Binary Entailment
+        reasoners.add(new TCachedEntailment()); // Cached Ternary Entailment
 
         // Time each reasoner for each query
         for (PlFormula query : queries) {
@@ -48,3 +51,4 @@ public class TimedReasonerComparison {
         }
     }
 }
+

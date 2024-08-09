@@ -1,7 +1,10 @@
+org\rationalclosure\NCachedEntailment.class
+org\rationalclosure\TCachedEntailment.class
 org\rationalclosure\BinaryEntailment.class
 org\rationalclosure\TernaryEntailment.class
 org\rationalclosure\TimedReasonerComparison.class
 org\rationalclosure\App.class
 org\rationalclosure\BaseRankThreaded.class
+org\rationalclosure\BCachedEntailment.class
 org\rationalclosure\NaiveEntailment.class
 org\rationalclosure\EntailmentInterface.class
