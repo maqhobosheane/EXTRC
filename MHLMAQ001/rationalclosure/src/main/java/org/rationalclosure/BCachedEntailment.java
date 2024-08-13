@@ -1,4 +1,4 @@
-/* Author: Maqhobosheane Mohlerepe*/
+/* Author: Maqhobosheane Mohlerepe */
 
 package org.rationalclosure;
 
@@ -9,106 +9,105 @@ import org.tweetyproject.logics.pl.reasoner.SatReasoner;
 
 public class BCachedEntailment implements EntailmentInterface {
 
-    // Cache to store previously computed entailment results
-    private HashMap<String, Boolean> cache = new HashMap<>();
-
-    private PlBeliefSet[] rankedKB;
-    private PlFormula formula;
-
-    // Constructor that accepts rankedKB and formula
-    public BCachedEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
-        this.rankedKB = rankedKB;
-        this.formula = formula;
-    }
-
-    // Default constructor
-    public BCachedEntailment() {
-    }
+    // Cache to store previously computed query results
+    private HashMap<String, Boolean> queryCache = new HashMap<>();
+    
+    // Cache to store the filtered knowledge base for each negated antecedent
+    private HashMap<String, PlBeliefSet[]> filteredKBCache = new HashMap<>();
 
     // Main method to check entailment using binary rational closure with caching
     @Override
     public boolean checkEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
         System.out.println("Starting binary entailment check for: " + formula.toString());
 
-        // Generate a unique key for the cache based on the formula and rankedKB
-        String cacheKey = generateCacheKey(rankedKB, formula);
+        // Generate a unique key for the query cache based on the formula and rankedKB
+        String queryCacheKey = generateCacheKey(rankedKB, formula);
 
-        // Check if the result is already in the cache
-        if (cache.containsKey(cacheKey)) {
-            System.out.println("Cache hit for formula: " + formula);
-            return cache.get(cacheKey);
+        // Check if the result for the full query is already in the cache
+        if (queryCache.containsKey(queryCacheKey)) {
+            System.out.println("Query cache hit for formula: " + formula);
+            return queryCache.get(queryCacheKey);
         }
 
-        // Check if the infinite rank is empty
-        boolean infiniteRankEmpty = rankedKB.length == 0 || rankedKB[rankedKB.length - 1].isEmpty();
+        // Generate a unique key for the filtered KB cache based on the negated antecedent
+        PlFormula negatedAntecedent = App.negateAntecedent(formula);
+        String negatedAntecedentKey = negatedAntecedent.toString();
 
-        // If infinite rank is not empty, treat it as an additional rank
-        int high = infiniteRankEmpty ? rankedKB.length - 1 : rankedKB.length;
+        PlBeliefSet[] filteredKB;
+        if (filteredKBCache.containsKey(negatedAntecedentKey)) {
+            System.out.println("Filtered KB cache hit for negated antecedent: " + negatedAntecedent);
+            filteredKB = filteredKBCache.get(negatedAntecedentKey);
+        } else {
+            System.out.println("Cache miss for negated antecedent: " + negatedAntecedent);
+            // Compute the filtered knowledge base by removing inconsistent ranks
+            filteredKB = filterKnowledgeBase(rankedKB, negatedAntecedent);
+
+            // Cache the filtered knowledge base for the negated antecedent
+            filteredKBCache.put(negatedAntecedentKey, filteredKB);
+        }
+
+        // Check the full query entailment using the cached filtered knowledge base
+        boolean result = checkEntailmentForFilteredKB(filteredKB, formula);
+
+        // Store the result in the query cache
+        queryCache.put(queryCacheKey, result);
+
+        return result;
+    }
+
+    // Method to filter the knowledge base by removing inconsistent ranks based on the negated antecedent
+    private PlBeliefSet[] filterKnowledgeBase(PlBeliefSet[] rankedKB, PlFormula negatedAntecedent) {
+        SatReasoner reasoner = new SatReasoner();
+        int high = rankedKB.length;
         int low = 0;
 
-        // Initialize the reasoner
-        SatReasoner reasoner = new SatReasoner();
-        PlFormula negatedAntecedent = App.negateAntecedent(formula);
-
+        // Binary search to find the rank at which negated antecedent becomes consistent
         while (high > low) {
             int mid = low + (high - low) / 2;
-            //System.out.println("Low: " + low + ", High: " + high + ", Midpoint: " + mid);
+            PlBeliefSet combinedBeliefSet = combineRanks(rankedKB, mid + 1, rankedKB.length - 1);
 
-            // Check if removing ranks from mid+1 to high results in consistency with the negated antecedent
-            PlBeliefSet combinedBeliefSetMidToEnd = combineRanks(rankedKB, mid + 1, high - 1);
-            //System.out.println("Combined belief set (mid+1 to high-1): " + combinedBeliefSetMidToEnd.toString());
-
-            if (reasoner.query(combinedBeliefSetMidToEnd, negatedAntecedent)) {
-                low = mid + 1; // If consistent, update low to search the upper half
-                //System.out.println("Negated antecedent is consistent with combined belief set from mid+1 to high-1. Updating low to " + low);
+            if (reasoner.query(combinedBeliefSet, negatedAntecedent)) {
+                low = mid + 1;
             } else {
-                // Otherwise, check if adding rank mid results in consistency with the negated antecedent
-                PlBeliefSet combinedBeliefSetMinToMid = combineRanks(rankedKB, low, mid);
-                //System.out.println("Combined belief set (low to mid): " + combinedBeliefSetMinToMid.toString());
-
-                if (reasoner.query(combinedBeliefSetMinToMid, negatedAntecedent)) {
-                    high = mid; // If consistent, update high to search the lower half
-                    //System.out.println("Negated antecedent is consistent with combined belief set from low to mid. Updating high to " + high);
-                } else {
-                    // If not, check the final entailment result with the combined belief set
-                   // System.out.println("Checking final entailment result with combined belief set (low to mid): " + combinedBeliefSetMinToMid.toString());
-                    boolean finalResult = reasoner.query(combinedBeliefSetMinToMid, formula);
-                    System.out.println("Final entailment check result: " + finalResult);
-                    cache.put(cacheKey, finalResult); // Cache the result
-                    return finalResult;
-                }
+                high = mid;
             }
         }
 
-        // Final entailment check with the combined belief set from low to high
-        PlBeliefSet finalCombinedBeliefSet = combineRanks(rankedKB, low, high - 1);
-       // System.out.println("Final combined belief set (low to high-1): " + finalCombinedBeliefSet.toString());
-        boolean finalResult = reasoner.query(finalCombinedBeliefSet, formula);
-        System.out.println("Final entailment result: " + finalResult);
+        // The filtered knowledge base is composed of ranks from low to rankedKB.length - 1
+        PlBeliefSet[] filteredKB = new PlBeliefSet[rankedKB.length - low];
+        System.arraycopy(rankedKB, low, filteredKB, 0, filteredKB.length);
 
-        // Cache the final result before returning
-        cache.put(cacheKey, finalResult);
-        return finalResult;
+        return filteredKB;
     }
 
-    // Combine the belief sets from the specified range (start to end)
+    // Method to check entailment using a cached filtered knowledge base
+    private boolean checkEntailmentForFilteredKB(PlBeliefSet[] filteredKB, PlFormula formula) {
+        SatReasoner reasoner = new SatReasoner();
+        PlBeliefSet combinedFilteredKB = combineRanks(filteredKB, 0, filteredKB.length - 1);
+        return reasoner.query(combinedFilteredKB, formula);
+    }
+
+    // Method to combine ranks within a specific range
     private PlBeliefSet combineRanks(PlBeliefSet[] rankedKB, int start, int end) {
         PlBeliefSet combinedBeliefSet = new PlBeliefSet();
         for (int i = start; i <= end; i++) {
             combinedBeliefSet.addAll(rankedKB[i]);
         }
-        //System.out.println("Combined belief set for range " + start + " to " + end + ": " + combinedBeliefSet.toString());
         return combinedBeliefSet;
     }
 
     // Helper method to generate a unique cache key
     private String generateCacheKey(PlBeliefSet[] rankedKB, PlFormula formula) {
-        // Create a string that uniquely identifies the combination of the rankedKB and the formula
         StringBuilder sb = new StringBuilder(formula.toString());
         for (PlBeliefSet set : rankedKB) {
             sb.append(set.toString());
         }
         return sb.toString();
     }
-}
 
+    //Method to clear cache
+    public void clearCache() {
+        queryCache.clear();
+        filteredKBCache.clear();
+    }
+}
