@@ -40,38 +40,50 @@ public class BinaryEntailment implements EntailmentInterface {
 
         while (high > low) {
             int mid = low + (high - low) / 2;
-            //System.out.println("Low: " + low + ", High: " + high + ", Midpoint: " + mid);
+            System.out.println("Low: " + low + ", High: " + high + ", Midpoint: " + mid);
 
             // Check if removing ranks from mid+1 to high results in consistency with the negated antecedent
             PlBeliefSet combinedBeliefSetMidToEnd = combineRanks(rankedKB, mid + 1, high - 1);
-            //System.out.println("Combined belief set (mid+1 to high-1): " + combinedBeliefSetMidToEnd.toString());
+            System.out.println("Combined belief set (mid+1 to high-1): " + combinedBeliefSetMidToEnd.toString());
 
             if (reasoner.query(combinedBeliefSetMidToEnd, negatedAntecedent)) {
                 low = mid + 1; // If consistent, update low to search the upper half
-                //System.out.println("Negated antecedent is consistent with combined belief set from mid+1 to high-1. Updating low to " + low);
+                System.out.println("Negated antecedent is consistent with combined belief set from mid+1 to high-1. Updating low to " + low);
             } else {
                 // Otherwise, check if adding rank mid results in consistency with the negated antecedent
                 PlBeliefSet combinedBeliefSetMinToMid = combineRanks(rankedKB, low, mid);
-                //System.out.println("Combined belief set (low to mid): " + combinedBeliefSetMinToMid.toString());
+                System.out.println("Combined belief set (low to mid): " + combinedBeliefSetMinToMid.toString());
 
                 if (reasoner.query(combinedBeliefSetMinToMid, negatedAntecedent)) {
                     high = mid; // If consistent, update high to search the lower half
-                    //System.out.println("Negated antecedent is consistent with combined belief set from low to mid. Updating high to " + high);
+                    System.out.println("Negated antecedent is consistent with combined belief set from low to mid. Updating high to " + high);
                 } else {
-                    // If not, check the final entailment result with the combined belief set
-                    //System.out.println("Checking final entailment result with combined belief set (low to mid): " + combinedBeliefSetMinToMid.toString());
-                    boolean finalResult = reasoner.query(combinedBeliefSetMinToMid, formula);
+                    // If not, identify the highest rank in this set to determine the cutoff
+                    int highestRank = mid; // This rank will be the cutoff for removal
+                    System.out.println("Final belief set identified, highest rank to remove: " + highestRank);
+
+                    // Handle the edge case where no ranks are removed
+                    if (highestRank + 1 > rankedKB.length - 1) {
+                        highestRank = -1; // This indicates no ranks should be removed
+                    }
+
+                    // Combine ranks greater than the identified rank
+                    PlBeliefSet finalBeliefSet = combineRanks(rankedKB, highestRank + 1, rankedKB.length - 1);
+                    System.out.println("Final combined belief set after removing higher ranks: " + finalBeliefSet.toString());
+
+                    // Perform the final entailment check
+                    boolean finalResult = reasoner.query(finalBeliefSet, formula);
                     System.out.println("Final entailment check result: " + finalResult);
                     return finalResult;
                 }
             }
         }
 
-        // Final entailment check with the combined belief set from low to high
+        // Final entailment check with the combined belief set from low to high-1
         PlBeliefSet finalCombinedBeliefSet = combineRanks(rankedKB, low, high - 1);
-        //System.out.println("Final combined belief set (low to high-1): " + finalCombinedBeliefSet.toString());
+        System.out.println("Final combined belief set (low to high-1): " + finalCombinedBeliefSet.toString());
         boolean finalResult = reasoner.query(finalCombinedBeliefSet, formula);
-        //System.out.println("Final entailment result: " + finalResult);
+        System.out.println("Final entailment result: " + finalResult);
         return finalResult;
     }
 
@@ -81,7 +93,7 @@ public class BinaryEntailment implements EntailmentInterface {
         for (int i = start; i <= end; i++) {
             combinedBeliefSet.addAll(rankedKB[i]);
         }
-        //System.out.println("Combined belief set for range " + start + " to " + end + ": " + combinedBeliefSet.toString());
+        System.out.println("Combined belief set for range " + start + " to " + end + ": " + combinedBeliefSet.toString());
         return combinedBeliefSet;
     }
 }
