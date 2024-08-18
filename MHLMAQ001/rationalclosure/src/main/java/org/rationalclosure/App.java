@@ -82,6 +82,9 @@ public class App {
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
+        }catch (Exception e)
+        {
+            e.printStackTrace();
         }
     }
 

@@ -25,7 +25,7 @@ public class BinaryEntailment implements EntailmentInterface {
     // Main method to check entailment using binary rational closure
     @Override
     public boolean checkEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
-        System.out.println("Starting binary entailment check for: " + formula.toString());
+        //System.out.println("Starting binary entailment check for: " + formula.toString());
 
         // Check if the infinite rank is empty
         boolean infiniteRankEmpty = rankedKB.length == 0 || rankedKB[rankedKB.length - 1].isEmpty();
@@ -43,11 +43,11 @@ public class BinaryEntailment implements EntailmentInterface {
 
         while (high > low) {
             int mid = low + (high - low) / 2;
-            System.out.println("Low: " + low + ", High: " + high + ", Midpoint: " + mid);
+            //System.out.println("Low: " + low + ", High: " + high + ", Midpoint: " + mid);
 
             // Check if removing ranks from mid+1 to high results in consistency with the negated antecedent
             PlBeliefSet combinedBeliefSetMidToEnd = combineRanks(rankedKB, mid + 1, high - 1);
-            System.out.println("Combined belief set (mid+1 to high-1): " + combinedBeliefSetMidToEnd.toString());
+            //System.out.println("Combined belief set (mid+1 to high-1): " + combinedBeliefSetMidToEnd.toString());
 
             if (reasoner.query(combinedBeliefSetMidToEnd, negatedAntecedent)) {
                 low = mid + 1; // If consistent, update low to search the upper half
@@ -77,7 +77,7 @@ public class BinaryEntailment implements EntailmentInterface {
 
                     // Perform the final entailment check
                     boolean finalResult = reasoner.query(finalBeliefSet, formula);
-                    System.out.println("Final entailment check result: " + finalResult);
+                    //System.out.println("Final entailment check result: " + finalResult);
                     return finalResult;
                 }
             }
@@ -94,7 +94,7 @@ public class BinaryEntailment implements EntailmentInterface {
         }
 
         boolean finalResult = reasoner.query(finalCombinedBeliefSet, formula);
-        System.out.println("Final entailment result: " + finalResult);
+        //System.out.println("Final entailment result: " + finalResult);
         return finalResult;
     }
 
