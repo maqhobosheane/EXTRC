@@ -38,6 +38,9 @@ public class BinaryEntailment implements EntailmentInterface {
         SatReasoner reasoner = new SatReasoner();
         PlFormula negatedAntecedent = App.negateAntecedent(formula);
 
+        int originalLow = low;
+        int originalHigh = high;
+
         while (high > low) {
             int mid = low + (high - low) / 2;
             System.out.println("Low: " + low + ", High: " + high + ", Midpoint: " + mid);
@@ -58,13 +61,14 @@ public class BinaryEntailment implements EntailmentInterface {
                     high = mid; // If consistent, update high to search the lower half
                     System.out.println("Negated antecedent is consistent with combined belief set from low to mid. Updating high to " + high);
                 } else {
-                    // If not, identify the highest rank in this set to determine the cutoff
-                    int highestRank = mid; // This rank will be the cutoff for removal
+                    // Final belief set identified, highest rank to remove: mid
+                    int highestRank = mid;
                     System.out.println("Final belief set identified, highest rank to remove: " + highestRank);
 
-                    // Handle the edge case where no ranks are removed
-                    if (highestRank + 1 > rankedKB.length - 1) {
-                        highestRank = -1; // This indicates no ranks should be removed
+                    // Check if no ranks were removed, i.e., low and high still encompass the entire range
+                    if (low == originalLow && high == originalHigh) {
+                        System.out.println("No ranks removed; using the entire original belief set.");
+                        return reasoner.query(combineRanks(rankedKB, 0, rankedKB.length - 1), formula);
                     }
 
                     // Combine ranks greater than the identified rank
@@ -82,6 +86,13 @@ public class BinaryEntailment implements EntailmentInterface {
         // Final entailment check with the combined belief set from low to high-1
         PlBeliefSet finalCombinedBeliefSet = combineRanks(rankedKB, low, high - 1);
         System.out.println("Final combined belief set (low to high-1): " + finalCombinedBeliefSet.toString());
+
+        // Check if no ranks were removed, i.e., low and high still encompass the entire range
+        if (low == originalLow && high == originalHigh) {
+            System.out.println("No ranks removed; using the entire original belief set.");
+            return reasoner.query(combineRanks(rankedKB, 0, rankedKB.length - 1), formula);
+        }
+
         boolean finalResult = reasoner.query(finalCombinedBeliefSet, formula);
         System.out.println("Final entailment result: " + finalResult);
         return finalResult;
@@ -91,9 +102,12 @@ public class BinaryEntailment implements EntailmentInterface {
     private PlBeliefSet combineRanks(PlBeliefSet[] rankedKB, int start, int end) {
         PlBeliefSet combinedBeliefSet = new PlBeliefSet();
         for (int i = start; i <= end; i++) {
-            combinedBeliefSet.addAll(rankedKB[i]);
+            if (rankedKB[i] != null) {  // Ensure we're not adding null belief sets
+                combinedBeliefSet.addAll(rankedKB[i]);
+            }
         }
         System.out.println("Combined belief set for range " + start + " to " + end + ": " + combinedBeliefSet.toString());
         return combinedBeliefSet;
     }
 }
+

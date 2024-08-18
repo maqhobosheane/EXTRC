@@ -1,6 +1,0 @@
-KnowledgeBase,QuerySet,Algorithm,AverageTime(ms)
-YourKnowledgeBaseName,ranks10queries_SAME_ANTE.txt,NaiveEntailment,10148
-YourKnowledgeBaseName,ranks10queries_SAME_ANTE.txt,BinaryEntailment,7665
-YourKnowledgeBaseName,ranks10queries_SAME_ANTE.txt,TernaryEntailment,3225
-YourKnowledgeBaseName,ranks10queries_SAME_ANTE.txt,NCachedEntailment,232
-YourKnowledgeBaseName,ranks10queries_SAME_ANTE.txt,BCachedEntailment,80
