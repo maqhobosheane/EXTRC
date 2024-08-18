@@ -25,7 +25,7 @@ public class BCachedEntailment implements EntailmentInterface {
 
         // Check if the result for the full query is already in the cache
         if (queryCache.containsKey(queryCacheKey)) {
-            System.out.println("Query cache hit for formula: " + formula);
+            //System.out.println("Query cache hit for formula: " + formula);
             return queryCache.get(queryCacheKey);
         }
 
@@ -36,7 +36,7 @@ public class BCachedEntailment implements EntailmentInterface {
         // Check if the filtered knowledge base is already cached for this negated antecedent
         PlBeliefSet cachedFilteredKB = filteredKBCache.get(negatedAntecedentKey);
         if (cachedFilteredKB != null) {
-            System.out.println("Filtered KB cache hit for negated antecedent: " + negatedAntecedent);
+            //System.out.println("Filtered KB cache hit for negated antecedent: " + negatedAntecedent);
             SatReasoner reasoner = new SatReasoner();
             boolean result = reasoner.query(cachedFilteredKB, formula);
             queryCache.put(queryCacheKey, result); // Cache the result

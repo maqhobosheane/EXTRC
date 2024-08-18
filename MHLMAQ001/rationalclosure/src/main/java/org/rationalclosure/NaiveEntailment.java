@@ -39,7 +39,7 @@ public class NaiveEntailment implements EntailmentInterface {
         PlBeliefSet[] filteredKBArray = new PlBeliefSet[filteredKB.size()];
         filteredKBArray = filteredKB.toArray(filteredKBArray);
         boolean finalResult = checkEntailmentForRange(filteredKBArray, formula, 0, filteredKBArray.length - 1);
-        System.out.println("Final entailment result: " + finalResult);
+        //System.out.println("Final entailment result: " + finalResult);
         return finalResult;
     }
 

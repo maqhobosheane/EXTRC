@@ -23,7 +23,7 @@ public class NCachedEntailment implements EntailmentInterface {
 
         // Check if the result for the full query is already in the cache
         if (queryCache.containsKey(queryCacheKey)) {
-            System.out.println("Query cache hit for formula: " + formula);
+            //System.out.println("Query cache hit for formula: " + formula);
             return queryCache.get(queryCacheKey);
         }
 
@@ -33,10 +33,10 @@ public class NCachedEntailment implements EntailmentInterface {
 
         PlBeliefSet[] filteredKB;
         if (filteredKBCache.containsKey(negatedAntecedentKey)) {
-            System.out.println("Filtered KB cache hit for negated antecedent: " + negatedAntecedent);
+           // System.out.println("Filtered KB cache hit for negated antecedent: " + negatedAntecedent);
             filteredKB = filteredKBCache.get(negatedAntecedentKey);
         } else {
-            System.out.println("Cache miss for negated antecedent: " + negatedAntecedent);
+            //System.out.println("Cache miss for negated antecedent: " + negatedAntecedent);
             // Compute the filtered knowledge base by removing inconsistent ranks
             filteredKB = filterKnowledgeBase(rankedKB, negatedAntecedent);
 
