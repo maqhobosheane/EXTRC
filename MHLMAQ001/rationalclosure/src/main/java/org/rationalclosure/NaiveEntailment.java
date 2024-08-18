@@ -26,7 +26,7 @@ public class NaiveEntailment implements EntailmentInterface {
     // Main method to check entailment using naive rational closure
     @Override
     public boolean checkEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
-        System.out.println("Starting naive entailment check for: " + formula.toString());
+        //System.out.println("Starting naive entailment check for: " + formula.toString());
 
         // Remove contradictory ranks
         ArrayList<PlBeliefSet> filteredKB = removeContradictions(rankedKB, formula);
@@ -63,7 +63,7 @@ public class NaiveEntailment implements EntailmentInterface {
                 // If it does not entail the negation, include this rank
                 filteredKB.add(rankedKB[i]);
             } else {
-                System.out.println("Removing contradictory rank: " + i);
+                //System.out.println("Removing contradictory rank: " + i);
             }
         }
 
@@ -78,7 +78,7 @@ public class NaiveEntailment implements EntailmentInterface {
             combinedBeliefSet.addAll(rankedKB[i]);
         }
 
-        System.out.println("Combined belief set for range " + min + " to " + max + ": " + combinedBeliefSet.toString());
+        //System.out.println("Combined belief set for range " + min + " to " + max + ": " + combinedBeliefSet.toString());
 
         // Check entailment using the SAT reasoner from the TweetyProject
         SatReasoner reasoner = new SatReasoner();

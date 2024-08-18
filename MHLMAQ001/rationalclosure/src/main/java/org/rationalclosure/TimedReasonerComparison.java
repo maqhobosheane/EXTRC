@@ -32,7 +32,7 @@ public class TimedReasonerComparison {
         List<EntailmentInterface> reasoners = new ArrayList<>();
         reasoners.add(new NaiveEntailment());
         reasoners.add(new BinaryEntailment());
-        reasoners.add(new TernaryEntailment());
+        //reasoners.add(new TernaryEntailment());
         reasoners.add(new NCachedEntailment()); // Cached Naive Entailment
         reasoners.add(new BCachedEntailment()); // Cached Binary Entailment
         //reasoners.add(new TCachedEntailment()); // Cached Ternary Entailment
