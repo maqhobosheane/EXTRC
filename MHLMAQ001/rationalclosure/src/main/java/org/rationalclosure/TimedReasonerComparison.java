@@ -32,10 +32,10 @@ public class TimedReasonerComparison {
         List<EntailmentInterface> reasoners = new ArrayList<>();
         reasoners.add(new NaiveEntailment());
         reasoners.add(new BinaryEntailment());
-        //reasoners.add(new TernaryEntailment());
+        reasoners.add(new TernaryEntailment());
         reasoners.add(new NCachedEntailment()); // Cached Naive Entailment
         reasoners.add(new BCachedEntailment()); // Cached Binary Entailment
-        //reasoners.add(new TCachedEntailment()); // Cached Ternary Entailment
+        reasoners.add(new TCachedEntailment()); // Cached Ternary Entailment
 
         // Prepare CSV writer
         try (FileWriter csvWriter = new FileWriter("timing_results.csv")) {
@@ -45,8 +45,8 @@ public class TimedReasonerComparison {
             for (EntailmentInterface reasoner : reasoners) {
                 long totalTime = 0;
 
-                // Run the entire query set 10 times and calculate the average time
-                for (int i = 0; i < 10; i++) {
+                // Run the entire query set 5 times and calculate the average time
+                for (int i = 0; i < 5; i++) {
                     long startTime = System.nanoTime();
 
                     // Check entailment for all queries in the set
@@ -68,7 +68,7 @@ public class TimedReasonerComparison {
                     }
                 }
 
-                long averageTime = totalTime / 10;
+                long averageTime = totalTime / 5;
                 System.out.println(reasoner.getClass().getSimpleName() + " took " + averageTime + " ms on average for the entire query set");
 
                 // Write the result to the CSV file

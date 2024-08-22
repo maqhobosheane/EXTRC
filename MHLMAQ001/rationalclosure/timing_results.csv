@@ -1,5 +1,0 @@
-KnowledgeBase,QuerySet,Algorithm,AverageTime(ms)
-YourKnowledgeBaseName,50queries.txt,NaiveEntailment,13246
-YourKnowledgeBaseName,50queries.txt,BinaryEntailment,2484
-YourKnowledgeBaseName,50queries.txt,NCachedEntailment,15022
-YourKnowledgeBaseName,50queries.txt,BCachedEntailment,2598

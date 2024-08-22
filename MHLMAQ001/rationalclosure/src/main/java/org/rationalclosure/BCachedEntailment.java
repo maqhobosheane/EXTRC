@@ -18,14 +18,13 @@ public class BCachedEntailment implements EntailmentInterface {
     // Main method to check entailment using binary rational closure with caching
     @Override
     public boolean checkEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
-        System.out.println("Starting binary entailment check for: " + formula.toString());
+        //System.out.println("Starting binary entailment check for: " + formula.toString());
 
         // Generate a unique key for the query cache based on the formula and rankedKB
         String queryCacheKey = generateCacheKey(rankedKB, formula);
 
         // Check if the result for the full query is already in the cache
         if (queryCache.containsKey(queryCacheKey)) {
-            //System.out.println("Query cache hit for formula: " + formula);
             return queryCache.get(queryCacheKey);
         }
 
@@ -36,7 +35,6 @@ public class BCachedEntailment implements EntailmentInterface {
         // Check if the filtered knowledge base is already cached for this negated antecedent
         PlBeliefSet cachedFilteredKB = filteredKBCache.get(negatedAntecedentKey);
         if (cachedFilteredKB != null) {
-            //System.out.println("Filtered KB cache hit for negated antecedent: " + negatedAntecedent);
             SatReasoner reasoner = new SatReasoner();
             boolean result = reasoner.query(cachedFilteredKB, formula);
             queryCache.put(queryCacheKey, result); // Cache the result
@@ -56,39 +54,37 @@ public class BCachedEntailment implements EntailmentInterface {
 
         while (high > low) {
             int mid = low + (high - low) / 2;
-            //System.out.println("Low: " + low + ", High: " + high + ", Midpoint: " + mid);
 
             PlBeliefSet combinedBeliefSetMidToEnd = combineRanks(rankedKB, mid + 1, high - 1);
-            //System.out.println("Combined belief set (mid+1 to high-1): " + combinedBeliefSetMidToEnd.toString());
+            if (!infiniteRankEmpty) {
+                combinedBeliefSetMidToEnd.addAll(rankedKB[rankedKB.length - 1]); // Always add infinite rank
+            }
 
             if (reasoner.query(combinedBeliefSetMidToEnd, App.negateAntecedent(formula))) {
                 low = mid + 1;
-                //System.out.println("Negated antecedent is consistent with combined belief set from mid+1 to high-1. Updating low to " + low);
             } else {
                 PlBeliefSet combinedBeliefSetMinToMid = combineRanks(rankedKB, low, mid);
-                //System.out.println("Combined belief set (low to mid): " + combinedBeliefSetMinToMid.toString());
+                if (!infiniteRankEmpty) {
+                    combinedBeliefSetMinToMid.addAll(rankedKB[rankedKB.length - 1]); // Always add infinite rank
+                }
 
                 if (reasoner.query(combinedBeliefSetMinToMid, App.negateAntecedent(formula))) {
                     high = mid;
-                    //System.out.println("Negated antecedent is consistent with combined belief set from low to mid. Updating high to " + high);
                 } else {
-                    // Final belief set identified, highest rank to remove: mid
                     int highestRank = mid;
-                    //System.out.println("Final belief set identified, highest rank to remove: " + highestRank);
 
-                    // Check if no ranks were removed, i.e., low and high still encompass the entire range
+                    // If no ranks were removed, use the entire original belief set
                     if (low == originalLow && high == originalHigh) {
-                        //System.out.println("No ranks removed; using the entire original belief set.");
                         boolean result = reasoner.query(combineRanks(rankedKB, 0, rankedKB.length - 1), formula);
                         queryCache.put(queryCacheKey, result); // Cache the result
                         return result;
                     }
 
-                    // If this is the first time we're encountering this negated antecedent, cache the filtered belief set
                     PlBeliefSet finalFilteredBeliefSet = combineRanks(rankedKB, highestRank + 1, rankedKB.length - 1);
-                    //System.out.println("Final combined belief set after removing higher ranks (before caching): " + finalFilteredBeliefSet.toString());
+                    if (!infiniteRankEmpty) {
+                        finalFilteredBeliefSet.addAll(rankedKB[rankedKB.length - 1]); // Always add infinite rank
+                    }
                     filteredKBCache.put(negatedAntecedentKey, finalFilteredBeliefSet);
-                    //System.out.println("Caching filtered belief set for negated antecedent: " + negatedAntecedentKey);
 
                     boolean finalResult = reasoner.query(finalFilteredBeliefSet, formula);
                     queryCache.put(queryCacheKey, finalResult); // Cache the result
@@ -99,7 +95,6 @@ public class BCachedEntailment implements EntailmentInterface {
 
         // Edge Case: No ranks were removed, use the entire original belief set
         if (low == originalLow && high == originalHigh) {
-            //System.out.println("No ranks removed; using the entire original belief set.");
             boolean result = reasoner.query(combineRanks(rankedKB, 0, rankedKB.length - 1), formula);
             queryCache.put(queryCacheKey, result); // Cache the result
             return result;
@@ -107,7 +102,9 @@ public class BCachedEntailment implements EntailmentInterface {
 
         // Final entailment check with the combined belief set from low to high-1
         PlBeliefSet finalCombinedBeliefSet = combineRanks(rankedKB, low, high - 1);
-        //System.out.println("Final combined belief set (low to high-1): " + finalCombinedBeliefSet.toString());
+        if (!infiniteRankEmpty) {
+            finalCombinedBeliefSet.addAll(rankedKB[rankedKB.length - 1]); // Always add infinite rank
+        }
 
         boolean finalResult = reasoner.query(finalCombinedBeliefSet, formula);
         queryCache.put(queryCacheKey, finalResult); // Cache the result
@@ -122,7 +119,6 @@ public class BCachedEntailment implements EntailmentInterface {
                 combinedBeliefSet.addAll(rankedKB[i]);
             }
         }
-        //System.out.println("Combined belief set for range " + start + " to " + end + ": " + combinedBeliefSet.toString());
         return combinedBeliefSet;
     }
 

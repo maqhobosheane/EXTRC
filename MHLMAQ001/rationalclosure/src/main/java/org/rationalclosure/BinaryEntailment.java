@@ -1,4 +1,5 @@
 /* Author: Maqhobosheane Mohlerepe, algorithm adopted from Joel Hamilton */
+/* Author: Maqhobosheane Mohlerepe, algorithm adopted from Joel Hamilton */
 
 package org.rationalclosure;
 
@@ -8,7 +9,7 @@ import org.tweetyproject.logics.pl.syntax.PlFormula;
 import org.tweetyproject.logics.pl.reasoner.SatReasoner;
 
 public class BinaryEntailment implements EntailmentInterface {
-  
+
     private PlBeliefSet[] rankedKB;
     private PlFormula formula;
 
@@ -47,6 +48,9 @@ public class BinaryEntailment implements EntailmentInterface {
 
             // Check if removing ranks from mid+1 to high results in consistency with the negated antecedent
             PlBeliefSet combinedBeliefSetMidToEnd = combineRanks(rankedKB, mid + 1, high - 1);
+            if (!infiniteRankEmpty) {
+                combinedBeliefSetMidToEnd.addAll(rankedKB[rankedKB.length - 1]); // Always add infinite rank
+            }
             //System.out.println("Combined belief set (mid+1 to high-1): " + combinedBeliefSetMidToEnd.toString());
 
             if (reasoner.query(combinedBeliefSetMidToEnd, negatedAntecedent)) {
@@ -55,6 +59,9 @@ public class BinaryEntailment implements EntailmentInterface {
             } else {
                 // Otherwise, check if adding rank mid results in consistency with the negated antecedent
                 PlBeliefSet combinedBeliefSetMinToMid = combineRanks(rankedKB, low, mid);
+                if (!infiniteRankEmpty) {
+                    combinedBeliefSetMinToMid.addAll(rankedKB[rankedKB.length - 1]); // Always add infinite rank
+                }
                 //System.out.println("Combined belief set (low to mid): " + combinedBeliefSetMinToMid.toString());
 
                 if (reasoner.query(combinedBeliefSetMinToMid, negatedAntecedent)) {
@@ -73,6 +80,9 @@ public class BinaryEntailment implements EntailmentInterface {
 
                     // Combine ranks greater than the identified rank
                     PlBeliefSet finalBeliefSet = combineRanks(rankedKB, highestRank + 1, rankedKB.length - 1);
+                    if (!infiniteRankEmpty) {
+                        finalBeliefSet.addAll(rankedKB[rankedKB.length - 1]); // Always add infinite rank
+                    }
                     //System.out.println("Final combined belief set after removing higher ranks: " + finalBeliefSet.toString());
 
                     // Perform the final entailment check
@@ -85,6 +95,9 @@ public class BinaryEntailment implements EntailmentInterface {
 
         // Final entailment check with the combined belief set from low to high-1
         PlBeliefSet finalCombinedBeliefSet = combineRanks(rankedKB, low, high - 1);
+        if (!infiniteRankEmpty) {
+            finalCombinedBeliefSet.addAll(rankedKB[rankedKB.length - 1]); // Always add infinite rank
+        }
         //System.out.println("Final combined belief set (low to high-1): " + finalCombinedBeliefSet.toString());
 
         // Check if no ranks were removed, i.e., low and high still encompass the entire range
@@ -110,4 +123,3 @@ public class BinaryEntailment implements EntailmentInterface {
         return combinedBeliefSet;
     }
 }
-

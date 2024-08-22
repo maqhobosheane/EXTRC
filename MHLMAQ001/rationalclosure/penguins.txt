@@ -1,4 +1,4 @@
-p -> b
-p ~> !f
-p ~> w
-b ~> f
+penguin -> bird
+penguin ~> !fly
+penguin ~> wing
+bird ~> fly
