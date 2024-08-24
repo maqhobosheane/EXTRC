@@ -15,16 +15,18 @@ public class BCachedEntailment implements EntailmentInterface {
     // Cache to store the final filtered belief set for each negated antecedent
     private HashMap<String, PlBeliefSet> filteredKBCache = new HashMap<>();
 
+    // Cache hit counter
+    private int cacheHitCounter = 0;
+
     // Main method to check entailment using binary rational closure with caching
     @Override
     public boolean checkEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
-        //System.out.println("Starting binary entailment check for: " + formula.toString());
-
         // Generate a unique key for the query cache based on the formula and rankedKB
         String queryCacheKey = generateCacheKey(rankedKB, formula);
 
         // Check if the result for the full query is already in the cache
         if (queryCache.containsKey(queryCacheKey)) {
+            cacheHitCounter++;  // Increment the cache hit counter
             return queryCache.get(queryCacheKey);
         }
 
@@ -35,6 +37,7 @@ public class BCachedEntailment implements EntailmentInterface {
         // Check if the filtered knowledge base is already cached for this negated antecedent
         PlBeliefSet cachedFilteredKB = filteredKBCache.get(negatedAntecedentKey);
         if (cachedFilteredKB != null) {
+            cacheHitCounter++;  // Increment the cache hit counter
             SatReasoner reasoner = new SatReasoner();
             boolean result = reasoner.query(cachedFilteredKB, formula);
             queryCache.put(queryCacheKey, result); // Cache the result
@@ -131,9 +134,15 @@ public class BCachedEntailment implements EntailmentInterface {
         return sb.toString();
     }
 
-    // Method to clear cache
+    // Method to clear cache and reset cache hit counter
     public void clearCache() {
         queryCache.clear();
         filteredKBCache.clear();
+        cacheHitCounter = 0;  // Reset the cache hit counter
+    }
+
+    // Getter method for cache hit counter
+    public int getCacheHitCounter() {
+        return cacheHitCounter;
     }
 }

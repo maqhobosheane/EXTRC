@@ -1,0 +1,7 @@
+KnowledgeBase,QuerySet,Algorithm,AverageTime(ms),CacheHitCounter
+kbsets\normal10.txt,querysets\samequery.txt,NaiveEntailment,19777,0
+kbsets\normal10.txt,querysets\samequery.txt,BinaryEntailment,5950,0
+kbsets\normal10.txt,querysets\samequery.txt,TernaryEntailment,15108,0
+kbsets\normal10.txt,querysets\samequery.txt,NCachedEntailment,393,49
+kbsets\normal10.txt,querysets\samequery.txt,BCachedEntailment,134,49
+kbsets\normal10.txt,querysets\samequery.txt,TCachedEntailment,314,49

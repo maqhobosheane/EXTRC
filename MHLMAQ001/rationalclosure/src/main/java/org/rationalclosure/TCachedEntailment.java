@@ -20,6 +20,9 @@ public class TCachedEntailment implements EntailmentInterface {
     // Cache to store the final filtered belief set for each negated antecedent
     private HashMap<String, PlBeliefSet> filteredKBCache = new HashMap<>();
 
+    // Cache hit counter
+    private int cacheHitCounter = 0;
+
     // Constructor to accept rankedKB and formula
     public TCachedEntailment() {
         // Initialize the SAT solver and reasoner
@@ -37,6 +40,7 @@ public class TCachedEntailment implements EntailmentInterface {
 
         // Check if the result for the full query is already in the cache
         if (queryCache.containsKey(queryCacheKey)) {
+            cacheHitCounter++;  // Increment the cache hit counter
             return queryCache.get(queryCacheKey);
         }
 
@@ -46,6 +50,7 @@ public class TCachedEntailment implements EntailmentInterface {
         // Check if the filtered knowledge base is already cached for this negated antecedent
         PlBeliefSet cachedFilteredKB = filteredKBCache.get(negatedAntecedentKey);
         if (cachedFilteredKB != null) {
+            cacheHitCounter++;  // Increment the cache hit counter
             SatReasoner reasoner = new SatReasoner();
             boolean result = reasoner.query(cachedFilteredKB, formula);
             queryCache.put(queryCacheKey, result); // Cache the result
@@ -130,9 +135,15 @@ public class TCachedEntailment implements EntailmentInterface {
         return sb.toString();
     }
 
-    // Method to clear cache
+    // Method to clear cache and reset cache hit counter
     public void clearCache() {
         queryCache.clear();
         filteredKBCache.clear();
+        cacheHitCounter = 0;  // Reset the cache hit counter
+    }
+
+    // Getter method for cache hit counter
+    public int getCacheHitCounter() {
+        return cacheHitCounter;
     }
 }

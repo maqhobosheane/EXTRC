@@ -1,0 +1,7 @@
+KnowledgeBase;QuerySet;Algorithm;AverageTime(ms);CacheHitCounter
+kbsets\2k50.txt;querysets\mixed_repeated_100.txt;NaiveEntailment;199508;0
+kbsets\2k50.txt;querysets\mixed_repeated_100.txt;BinaryEntailment;20081;0
+kbsets\2k50.txt;querysets\mixed_repeated_100.txt;TernaryEntailment;39609;0
+kbsets\2k50.txt;querysets\mixed_repeated_100.txt;NCachedEntailment;94809;50
+kbsets\2k50.txt;querysets\mixed_repeated_100.txt;BCachedEntailment;14183;50
+kbsets\2k50.txt;querysets\mixed_repeated_100.txt;TCachedEntailment;22594;50

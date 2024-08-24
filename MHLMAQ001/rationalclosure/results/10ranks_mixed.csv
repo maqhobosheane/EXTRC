@@ -1,0 +1,7 @@
+KnowledgeBase,QuerySet,Algorithm,AverageTime(ms),CacheHitCounter
+kbsets\10ranks.txt,querysets\mixed_repeated_100.txt,NaiveEntailment,38668,0
+kbsets\10ranks.txt,querysets\mixed_repeated_100.txt,BinaryEntailment,11183,0
+kbsets\10ranks.txt,querysets\mixed_repeated_100.txt,TernaryEntailment,26070,0
+kbsets\10ranks.txt,querysets\mixed_repeated_100.txt,NCachedEntailment,19734,50
+kbsets\10ranks.txt,querysets\mixed_repeated_100.txt,BCachedEntailment,5868,50
+kbsets\10ranks.txt,querysets\mixed_repeated_100.txt,TCachedEntailment,13214,50

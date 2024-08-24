@@ -1,0 +1,7 @@
+KnowledgeBase,QuerySet,Algorithm,AverageTime(ms),CacheHitCounter
+kbsets\exp10.txt,querysets\samequery.txt,NaiveEntailment,15044,0
+kbsets\exp10.txt,querysets\samequery.txt,BinaryEntailment,4361,0
+kbsets\exp10.txt,querysets\samequery.txt,TernaryEntailment,13539,0
+kbsets\exp10.txt,querysets\samequery.txt,NCachedEntailment,371,49
+kbsets\exp10.txt,querysets\samequery.txt,BCachedEntailment,91,49
+kbsets\exp10.txt,querysets\samequery.txt,TCachedEntailment,258,49

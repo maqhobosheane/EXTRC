@@ -15,10 +15,10 @@ import org.tweetyproject.commons.ParserException;
 
 public class TimedReasonerComparison {
 
-    public static void runTimedComparison(ArrayList<PlBeliefSet> rankedKB, PlParser parser, String queryFile) throws IOException, ParserException {
+    public static void runTimedComparison(ArrayList<PlBeliefSet> rankedKB, PlParser parser, String kbFile, String querySetName) throws IOException, ParserException {
         // Read the query file and store the queries
         List<PlFormula> queries = new ArrayList<>();
-        try (Scanner qreader = new Scanner(new File(queryFile))) {
+        try (Scanner qreader = new Scanner(new File(querySetName))) {
             while (qreader.hasNextLine()) {
                 String queryFormula = qreader.nextLine().trim();
                 if (!queryFormula.isEmpty()) {
@@ -38,12 +38,13 @@ public class TimedReasonerComparison {
         reasoners.add(new TCachedEntailment()); // Cached Ternary Entailment
 
         // Prepare CSV writer
-        try (FileWriter csvWriter = new FileWriter("timing_results.csv")) {
-            csvWriter.append("KnowledgeBase,QuerySet,Algorithm,AverageTime(ms)\n");
+        try (FileWriter csvWriter = new FileWriter("results\\normal10_firstrank.csv")) {
+            csvWriter.append("KnowledgeBase,QuerySet,Algorithm,AverageTime(ms),CacheHitCounter\n");
 
             // Time each reasoner for the entire query set
             for (EntailmentInterface reasoner : reasoners) {
                 long totalTime = 0;
+                int cacheHitCounter = 0;
 
                 // Run the entire query set 5 times and calculate the average time
                 for (int i = 0; i < 5; i++) {
@@ -58,12 +59,15 @@ public class TimedReasonerComparison {
                     long duration = (endTime - startTime) / 1000000; // Convert to milliseconds
                     totalTime += duration;
 
-                    // Clear the cache after each iteration
+                    // If the reasoner is a cached reasoner, get the cache hit counter
                     if (reasoner instanceof NCachedEntailment) {
-                        ((NCachedEntailment) reasoner).clearCache();
+                        cacheHitCounter = ((NCachedEntailment) reasoner).getCacheHitCounter();
+                        ((NCachedEntailment) reasoner).clearCache(); // Clear the cache after each iteration
                     } else if (reasoner instanceof BCachedEntailment) {
+                        cacheHitCounter = ((BCachedEntailment) reasoner).getCacheHitCounter();
                         ((BCachedEntailment) reasoner).clearCache();
                     } else if (reasoner instanceof TCachedEntailment) {
+                        cacheHitCounter = ((TCachedEntailment) reasoner).getCacheHitCounter();
                         ((TCachedEntailment) reasoner).clearCache();
                     }
                 }
@@ -72,10 +76,10 @@ public class TimedReasonerComparison {
                 System.out.println(reasoner.getClass().getSimpleName() + " took " + averageTime + " ms on average for the entire query set");
 
                 // Write the result to the CSV file
-                csvWriter.append("YourKnowledgeBaseName," + queryFile + "," + reasoner.getClass().getSimpleName() + "," + averageTime + "\n");
+                csvWriter.append(kbFile + "," + querySetName + "," + reasoner.getClass().getSimpleName() + "," + averageTime + "," + cacheHitCounter + "\n");
             }
         }
 
-        System.out.println("Timing results saved to timing_results.csv");
+        System.out.println("Timing results saved to firstrank.csv");
     }
 }

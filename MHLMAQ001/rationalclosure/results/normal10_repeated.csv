@@ -1,0 +1,7 @@
+KnowledgeBase,QuerySet,Algorithm,AverageTime(ms),CacheHitCounter
+kbsets\normal10.txt,querysets\repeated_antecedent.txt,NaiveEntailment,35585,0
+kbsets\normal10.txt,querysets\repeated_antecedent.txt,BinaryEntailment,10801,0
+kbsets\normal10.txt,querysets\repeated_antecedent.txt,TernaryEntailment,27514,0
+kbsets\normal10.txt,querysets\repeated_antecedent.txt,NCachedEntailment,4605,99
+kbsets\normal10.txt,querysets\repeated_antecedent.txt,BCachedEntailment,10446,0
+kbsets\normal10.txt,querysets\repeated_antecedent.txt,TCachedEntailment,4409,99

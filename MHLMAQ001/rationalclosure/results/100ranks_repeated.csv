@@ -1,0 +1,7 @@
+KnowledgeBase;QuerySet;Algorithm;AverageTime(ms);CacheHitCounter
+kbsets\100ranks.txt;querysets\repeated_antecedent.txt;NaiveEntailment;272325;0
+kbsets\100ranks.txt;querysets\repeated_antecedent.txt;BinaryEntailment;30527;0
+kbsets\100ranks.txt;querysets\repeated_antecedent.txt;TernaryEntailment;34470;0
+kbsets\100ranks.txt;querysets\repeated_antecedent.txt;NCachedEntailment;6303;99
+kbsets\100ranks.txt;querysets\repeated_antecedent.txt;BCachedEntailment;2710;99
+kbsets\100ranks.txt;querysets\repeated_antecedent.txt;TCachedEntailment;3577;99

@@ -1,0 +1,7 @@
+KnowledgeBase;QuerySet;Algorithm;AverageTime(ms);CacheHitCounter
+kbsets\500statements.txt;querysets\500statements_firstrank.txt;NaiveEntailment;1362;0
+kbsets\500statements.txt;querysets\500statements_firstrank.txt;BinaryEntailment;345;0
+kbsets\500statements.txt;querysets\500statements_firstrank.txt;TernaryEntailment;295;0
+kbsets\500statements.txt;querysets\500statements_firstrank.txt;NCachedEntailment;1644;0
+kbsets\500statements.txt;querysets\500statements_firstrank.txt;BCachedEntailment;362;0
+kbsets\500statements.txt;querysets\500statements_firstrank.txt;TCachedEntailment;248;0

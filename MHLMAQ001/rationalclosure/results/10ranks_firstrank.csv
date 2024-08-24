@@ -1,0 +1,7 @@
+KnowledgeBase;QuerySet;Algorithm;AverageTime(ms);CacheHitCounter
+kbsets\10ranks.txt;querysets\10ranks_firstrank.txt;NaiveEntailment;593;0
+kbsets\10ranks.txt;querysets\10ranks_firstrank.txt;BinaryEntailment;327;0
+kbsets\10ranks.txt;querysets\10ranks_firstrank.txt;TernaryEntailment;373;0
+kbsets\10ranks.txt;querysets\10ranks_firstrank.txt;NCachedEntailment;560;0
+kbsets\10ranks.txt;querysets\10ranks_firstrank.txt;BCachedEntailment;418;0
+kbsets\10ranks.txt;querysets\10ranks_firstrank.txt;TCachedEntailment;315;0

@@ -1,0 +1,7 @@
+KnowledgeBase;QuerySet;Algorithm;AverageTime(ms);CacheHitCounter
+kbsets\2k50.txt;querysets\halfrepeated_ante_query_100.txt;NaiveEntailment;117624;0
+kbsets\2k50.txt;querysets\halfrepeated_ante_query_100.txt;BinaryEntailment;16664;0
+kbsets\2k50.txt;querysets\halfrepeated_ante_query_100.txt;TernaryEntailment;21481;0
+kbsets\2k50.txt;querysets\halfrepeated_ante_query_100.txt;NCachedEntailment;37840;56
+kbsets\2k50.txt;querysets\halfrepeated_ante_query_100.txt;BCachedEntailment;5060;56
+kbsets\2k50.txt;querysets\halfrepeated_ante_query_100.txt;TCachedEntailment;6957;56

@@ -1,0 +1,7 @@
+KnowledgeBase,QuerySet,Algorithm,AverageTime(ms),CacheHitCounter
+kbsets\normal10.txt,querysets\normal10_lastrank.txt,NaiveEntailment,430,0
+kbsets\normal10.txt,querysets\normal10_lastrank.txt,BinaryEntailment,171,0
+kbsets\normal10.txt,querysets\normal10_lastrank.txt,TernaryEntailment,128,0
+kbsets\normal10.txt,querysets\normal10_lastrank.txt,NCachedEntailment,484,0
+kbsets\normal10.txt,querysets\normal10_lastrank.txt,BCachedEntailment,153,0
+kbsets\normal10.txt,querysets\normal10_lastrank.txt,TCachedEntailment,102,0

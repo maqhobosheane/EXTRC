@@ -1,0 +1,7 @@
+KnowledgeBase,QuerySet,Algorithm,AverageTime(ms),CacheHitCounter
+kbsets\normal10.txt,querysets\unique_100.txt,NaiveEntailment,34823,0
+kbsets\normal10.txt,querysets\unique_100.txt,BinaryEntailment,11360,0
+kbsets\normal10.txt,querysets\unique_100.txt,TernaryEntailment,25194,0
+kbsets\normal10.txt,querysets\unique_100.txt,NCachedEntailment,35781,0
+kbsets\normal10.txt,querysets\unique_100.txt,BCachedEntailment,10770,0
+kbsets\normal10.txt,querysets\unique_100.txt,TCachedEntailment,26696,0

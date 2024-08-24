@@ -16,6 +16,9 @@ public class NCachedEntailment implements EntailmentInterface {
     // Cache to store the filtered knowledge base for each negated antecedent
     private HashMap<String, PlBeliefSet[]> filteredKBCache = new HashMap<>();
 
+    // Cache hit counter
+    private int cacheHitCounter = 0;
+
     @Override
     public boolean checkEntailment(PlBeliefSet[] rankedKB, PlFormula formula) {
         // Generate a unique key for the query cache based on the formula and rankedKB
@@ -23,6 +26,7 @@ public class NCachedEntailment implements EntailmentInterface {
 
         // Check if the result for the full query is already in the cache
         if (queryCache.containsKey(queryCacheKey)) {
+            cacheHitCounter++;  // Increment the cache hit counter
             //System.out.println("Query cache hit for formula: " + formula);
             return queryCache.get(queryCacheKey);
         }
@@ -33,7 +37,8 @@ public class NCachedEntailment implements EntailmentInterface {
 
         PlBeliefSet[] filteredKB;
         if (filteredKBCache.containsKey(negatedAntecedentKey)) {
-           // System.out.println("Filtered KB cache hit for negated antecedent: " + negatedAntecedent);
+            cacheHitCounter++;  // Increment the cache hit counter
+            //System.out.println("Filtered KB cache hit for negated antecedent: " + negatedAntecedent);
             filteredKB = filteredKBCache.get(negatedAntecedentKey);
         } else {
             //System.out.println("Cache miss for negated antecedent: " + negatedAntecedent);
@@ -93,10 +98,15 @@ public class NCachedEntailment implements EntailmentInterface {
         return sb.toString();
     }
 
-    //Method to clear cache
+    // Method to clear cache and reset cache hit counter
     public void clearCache() {
         queryCache.clear();
         filteredKBCache.clear();
+        cacheHitCounter = 0;  // Reset the cache hit counter
     }
 
+    // Getter method for cache hit counter
+    public int getCacheHitCounter() {
+        return cacheHitCounter;
+    }
 }

@@ -19,7 +19,6 @@ public class QuerySetGenerator {
             "kbsets\\10ranks.txt",
             "kbsets\\100ranks.txt",
             "kbsets\\exp10.txt",
-            "kbsets\\uniform10.txt",
             "kbsets\\normal10.txt"
         };
         String outputFilePath = "unique_100.txt";
@@ -36,7 +35,7 @@ public class QuerySetGenerator {
                 reader.close();
             }
 
-            // Step 2: Ensure uniqueness and select 1000 unique statements
+            // Step 2: Ensure uniqueness and select 100 unique statements
             List<String> uniqueList = new ArrayList<>(uniqueStatements);
             if (uniqueList.size() >= 100) {
                 Random random = new Random();
